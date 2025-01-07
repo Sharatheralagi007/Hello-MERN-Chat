@@ -6,9 +6,13 @@ import axios from "axios";
 import ChatLoading from "./ChatLoading";
 import { getSender } from "../config/ChatLogics";
 import GroupChatModal from "./miscellaneous/GroupChatModal";
+import { io } from "socket.io-client";
+
+const ENDPOINT = "http://localhost:5000"; // Replace with your backend URL
+let socket;
 
 const MyChats = ({ fetchAgain }) => {
-  const [loggedUser, setLoggedUser] = useState(null); // Ensure default state is null
+  const [loggedUser, setLoggedUser] = useState(null);
   const { user, setSelectedChat, selectedChat, chats, setChats } = ChatState();
   const toast = useToast();
 
@@ -21,7 +25,7 @@ const MyChats = ({ fetchAgain }) => {
       };
 
       const { data } = await axios.get("/api/chat", config);
-      setChats(data); // Update the chats state with the latest data
+      setChats(data);
     } catch (error) {
       toast({
         title: "Error Occurred!",
@@ -37,11 +41,36 @@ const MyChats = ({ fetchAgain }) => {
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("userInfo"));
     if (storedUser) {
-      setLoggedUser(storedUser); // Set loggedUser from localStorage
+      setLoggedUser(storedUser);
       if (storedUser.token) {
-        fetchChats(); // Only call fetchChats if user data is valid
+        fetchChats();
       }
     }
+
+    // Setup socket connection
+    socket = io(ENDPOINT);
+    socket.emit("setup", storedUser);
+
+    // Listen for new messages
+    socket.on("message received", (newMessage) => {
+      setChats((prevChats) => {
+        const updatedChats = [...prevChats];
+        const chatIndex = updatedChats.findIndex(
+          (chat) => chat._id === newMessage.chat._id
+        );
+
+        if (chatIndex >= 0) {
+          updatedChats[chatIndex].latestMessage = newMessage;
+          return updatedChats;
+        }
+
+        return [newMessage.chat, ...updatedChats];
+      });
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, [fetchAgain]);
 
   return (
@@ -100,11 +129,17 @@ const MyChats = ({ fetchAgain }) => {
                 borderRadius="lg"
                 key={chat._id}
               >
-                <Text>
+                <Text fontWeight="bold">
                   {!chat.isGroupChat
                     ? getSender(loggedUser, chat.users)
                     : chat.chatName}
                 </Text>
+                {chat.latestMessage && (
+                  <Text fontSize="sm" color="gray.600">
+                    {chat.latestMessage.sender.name}:{" "}
+                    {chat.latestMessage.content}
+                  </Text>
+                )}
               </Box>
             ))}
           </Stack>

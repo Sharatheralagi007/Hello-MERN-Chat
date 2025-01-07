@@ -138,31 +138,68 @@ const SideDrawer = () => {
         <Text fontSize="2xl">Chat App</Text>
 
         <Box display="flex" alignItems="center">
-          {/* Bell Icon for Notifications */}
-          <Menu>
-            <MenuButton p={1}>
-              <BellIcon fontSize="2xl" />
-            </MenuButton>
-            <MenuList>
-              {notification.length === 0 ? (
-                <Text p={3}>No new notifications</Text>
-              ) : (
-                notification.map((notif) => (
-                  <MenuItem
-                    key={notif._id}
-                    onClick={() => {
-                      setSelectedChat(notif.chat);
-                      setNotification((prev) =>
-                        prev.filter((n) => n._id !== notif._id)
-                      );
-                    }}
-                  >
-                    New message from {notif.sender.name}
-                  </MenuItem>
-                ))
-              )}
-            </MenuList>
-          </Menu>
+          {/* Bell Icon for Notifications with Badge */}
+          <Box position="relative">
+            <Menu>
+              <MenuButton p={1}>
+                <Box position="relative">
+                  <BellIcon fontSize="2xl" />
+                  {notification.length > 0 && (
+                    <Box
+                      position="absolute"
+                      top="-1"
+                      right="-1"
+                      backgroundColor="red.500"
+                      color="white"
+                      fontSize="xs"
+                      borderRadius="full"
+                      width="18px"
+                      height="18px"
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                      fontWeight="bold"
+                    >
+                      {notification.length}
+                    </Box>
+                  )}
+                </Box>
+              </MenuButton>
+              <MenuList>
+                {notification.length === 0 ? (
+                  <Text p={3}>No new notifications</Text>
+                ) : (
+                  notification.map((notif) => (
+                    <MenuItem
+                      key={notif._id}
+                      onClick={() => {
+                        setSelectedChat(notif.chat); // Open the chat
+                        setNotification((prev) =>
+                          prev.filter((n) => n._id !== notif._id)
+                        ); // Remove notification
+                      }}
+                      display="flex"
+                      justifyContent="space-between"
+                    >
+                      <Box pr={3}>New message from {notif.sender.name}</Box>
+                      <Button
+                        size="xs"
+                        colorScheme="red"
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent triggering parent onClick
+                          setNotification((prev) =>
+                            prev.filter((n) => n._id !== notif._id)
+                          );
+                        }}
+                      >
+                        Clear
+                      </Button>
+                    </MenuItem>
+                  ))
+                )}
+              </MenuList>
+            </Menu>
+          </Box>
 
           {/* Profile Menu */}
           <Menu>
