@@ -4,7 +4,9 @@
   "description": "Chat app using MERN",
   "main": "server.js",
   "scripts": {
-    "start": "node backend/server.js"
+    "start": "node backend/server.js",
+    "server": "nodemon backend/server.js",
+    "build": "npm install --legacy-peer-deeps && npm install --legacy-peer-deeps --prefix frontend && npm run build --prefix frontend"
   },
   "author": "Sharath Heralagi",
   "license": "ISC",
