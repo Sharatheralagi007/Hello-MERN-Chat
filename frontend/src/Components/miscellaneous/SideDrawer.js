@@ -127,41 +127,59 @@ const SideDrawer = () => {
   return (
     <>
       <Box display="flex" justifyContent="space-between" bg="white" p={3}>
+        {/* Search Button */}
         <Tooltip label="Search Users">
           <Button variant="ghost" onClick={onOpen}>
             <i className="fas fa-search"></i>
             <Text px={2}>Search User</Text>
           </Button>
         </Tooltip>
+
         <Text fontSize="2xl">Chat App</Text>
-        <Menu>
-          <MenuButton p={1}>
-            <BellIcon fontSize="2xl" />
-          </MenuButton>
-          <MenuList>
-            {notification.map((notif) => (
-              <MenuItem
-                key={notif._id}
-                onClick={() => setSelectedChat(notif.chat)}
-              >
-                New message from {notif.sender.name}
-              </MenuItem>
-            ))}
-          </MenuList>
-        </Menu>
-        <Menu>
-          <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>
-            <Avatar size="sm" src={user.pic} />
-          </MenuButton>
-          <MenuList>
-            <ProfileModal user={user}>
-              <MenuItem>Profile</MenuItem>
-            </ProfileModal>
-            <MenuItem onClick={logoutHandler}>Logout</MenuItem>
-          </MenuList>
-        </Menu>
+
+        <Box display="flex" alignItems="center">
+          {/* Bell Icon for Notifications */}
+          <Menu>
+            <MenuButton p={1}>
+              <BellIcon fontSize="2xl" />
+            </MenuButton>
+            <MenuList>
+              {notification.length === 0 ? (
+                <Text p={3}>No new notifications</Text>
+              ) : (
+                notification.map((notif) => (
+                  <MenuItem
+                    key={notif._id}
+                    onClick={() => {
+                      setSelectedChat(notif.chat);
+                      setNotification((prev) =>
+                        prev.filter((n) => n._id !== notif._id)
+                      );
+                    }}
+                  >
+                    New message from {notif.sender.name}
+                  </MenuItem>
+                ))
+              )}
+            </MenuList>
+          </Menu>
+
+          {/* Profile Menu */}
+          <Menu>
+            <MenuButton as={Button} rightIcon={<ChevronDownIcon />} ml={2}>
+              <Avatar size="sm" src={user.pic} />
+            </MenuButton>
+            <MenuList>
+              <ProfileModal user={user}>
+                <MenuItem>Profile</MenuItem>
+              </ProfileModal>
+              <MenuItem onClick={logoutHandler}>Logout</MenuItem>
+            </MenuList>
+          </Menu>
+        </Box>
       </Box>
 
+      {/* Drawer for Search */}
       <Drawer placement="left" isOpen={isOpen} onClose={onClose}>
         <DrawerOverlay />
         <DrawerContent>

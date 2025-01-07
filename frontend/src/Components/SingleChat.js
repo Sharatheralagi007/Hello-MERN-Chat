@@ -27,7 +27,6 @@ function SingleChat({ fetchAgain, setFetchAgain }) {
   const [loading, setLoading] = useState(false);
   const [newMessage, setNewMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [typingUser, setTypingUser] = useState(null);
 
   const defaultOptions = {
     loop: true,
